@@ -20,11 +20,11 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:{{ service_port }}/healthz"]
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:{{ service_port }}/healthz')\" || exit 1"]
       interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   nginx:
     image: {{ nginx_image }}

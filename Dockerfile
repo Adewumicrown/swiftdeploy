@@ -21,8 +21,8 @@ COPY --from=builder /install/deps /usr/local
 # Copy application source
 COPY app/ .
 
-# Logs directory owned by appuser
-RUN mkdir -p /app/logs && chown -R appuser:appgroup /app/logs
+# Give appuser ownership of workdir
+RUN chown -R appuser:appgroup /app
 
 USER appuser
 
@@ -33,7 +33,8 @@ ENV MODE=stable \
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:3000/healthz || exit 1
+HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
+    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:3000/healthz')" || exit 1
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${APP_PORT} --workers 2 --timeout 60 --access-logfile /app/logs/access.log --error-logfile /app/logs/error.log main:app"]
+# Log to stdout/stderr
+CMD ["/bin/sh", "-c", "exec gunicorn --bind 0.0.0.0:${APP_PORT} --workers 2 --timeout 60 --access-logfile - --error-logfile - main:app"]
