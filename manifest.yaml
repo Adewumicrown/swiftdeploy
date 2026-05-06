@@ -9,6 +9,10 @@ nginx:
   port: 8080
   proxy_timeout: 30
 
+opa:
+  image: openpolicyagent/opa:latest
+  port: 8181
+
 network:
   name: swiftdeploy-net
   driver_type: bridge
@@ -17,3 +21,10 @@ restart_policy: unless-stopped
 
 volumes:
   logs: app-logs
+
+thresholds:
+  min_disk_free_gb: 10.0
+  max_cpu_load: 2.0
+  min_mem_available_pct: 10.0
+  max_error_rate_pct: 1.0
+  max_p99_latency_ms: 500.0

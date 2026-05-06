@@ -10,7 +10,6 @@ services:
       MODE: "{{ mode }}"
       APP_VERSION: "{{ app_version }}"
       APP_PORT: "{{ service_port }}"
-    # Port is intentionally NOT exposed — all traffic routes through Nginx
     networks:
       - {{ network_name }}
     volumes:
@@ -49,6 +48,34 @@ services:
       - SETGID
     security_opt:
       - no-new-privileges:true
+
+  opa:
+    image: {{ opa_image }}
+    container_name: swiftdeploy-opa
+    restart: {{ restart_policy }}
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:{{ opa_port }}"
+      - "--log-format=json"
+      - "/policies"
+    volumes:
+      - ./policies:/policies:ro
+    networks:
+      - {{ network_name }}
+    # OPA is NOT exposed via nginx — CLI only, internal network access
+    expose:
+      - "{{ opa_port }}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:{{ opa_port }}/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 networks:
   {{ network_name }}:
