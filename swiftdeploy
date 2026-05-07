@@ -435,14 +435,16 @@ def cmd_promote(target: str):
         info(f"Canary metrics → error_rate={error_rate}%  p99={p99_latency}ms  chaos={chaos_val}")
 
         input_data = {
-            "error_rate_pct":  error_rate,
-            "p99_latency_ms":  p99_latency,
-            "chaos_active":    chaos_val,
+            "metrics": {
+                "error_rate_pct":  error_rate,
+                "p99_latency_ms":  p99_latency,
+                "sample_count":    int(sum(v for _, v in metrics.get("counters", {}).get("http_requests_total", []))),
+        },
             "thresholds":      thresholds,
             "checked_at":      now_iso(),
             "context":         "pre-promote",
+            "chaos_active":    chaos_val,
         }
-
         decision = opa_query("swiftdeploy/canary", input_data)
         allowed  = enforce_policy(decision, "canary")
 
