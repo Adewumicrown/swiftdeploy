@@ -41,6 +41,7 @@ def record_request(method, path, status_code, duration):
         for i, b in enumerate(BUCKETS):
             if duration <= b:
                 duration_buckets[hist_key][i] += 1
+                break
         duration_sum[hist_key]   += duration
         duration_count[hist_key] += 1
 

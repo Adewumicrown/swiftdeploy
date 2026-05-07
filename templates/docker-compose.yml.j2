@@ -53,10 +53,13 @@ services:
     image: {{ opa_image }}
     container_name: swiftdeploy-opa
     restart: {{ restart_policy }}
+    ports:
+      - "127.0.0.1:8181:8181"
     command:
       - "run"
       - "--server"
       - "--addr=0.0.0.0:{{ opa_port }}"
+      - "--v1-compatible"
       - "--log-format=json"
       - "/policies"
     volumes:
